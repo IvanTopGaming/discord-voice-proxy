@@ -42,9 +42,9 @@ namespace DiscordProxyInstaller
                 }
             }
 
-            if (process.Contains("nekoray") || process.Contains("nekobox"))
+            if (process.Contains("nekoray") || process.Contains("nekobox") || process.Contains("throne"))
             {
-                if (Ask("Found NekoRay / NekoBox. Do you want to use 127.0.0.1:2080?"))
+                if (Ask("Found NekoRay / NekoBox / Throne. Do you want to use 127.0.0.1:2080?"))
                 {
                     Discord.InstallAndRun("127.0.0.1", "2080");
                     return;
