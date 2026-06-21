@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  FORCE_PROXY_VERSION: v0.2.0
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Integrate vcpkg
+        shell: pwsh
+        run: & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" integrate install
+
+      - name: Download force-proxy.dll
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path x64\Release | Out-Null
+          Invoke-WebRequest `
+            -Uri "https://github.com/runetfreedom/force-proxy/releases/download/$env:FORCE_PROXY_VERSION/force-proxy.dll" `
+            -OutFile x64\Release\force-proxy.dll
+
+      - name: Build DWrite.dll
+        run: msbuild discord-voice-proxy.sln /t:discord-voice-proxy /p:Configuration=Release /p:Platform=x64
+
+      - name: Build installer
+        run: dotnet publish installer/DiscordProxyInstaller.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o publish
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            publish/DiscordProxyInstaller.exe
+            x64/Release/DWrite.dll
+            x64/Release/force-proxy.dll
