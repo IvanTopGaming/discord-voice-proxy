@@ -29,7 +29,8 @@ jobs:
 
       - name: Integrate vcpkg
         shell: pwsh
-        run: & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" integrate install
+        run: |
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" integrate install
 
       - name: Download force-proxy.dll
         shell: pwsh
